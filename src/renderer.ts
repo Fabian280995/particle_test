@@ -1,8 +1,5 @@
-import { Particle } from "./particles/Particle";
-import { ParticleType } from "./particles/ParticleType";
+import { ParticleManager } from "./particles/particleManager";
 import { ParticlesRenderer } from "./particles/particlesRenderer";
-import { Color } from "./utils/color";
-import { Position } from "./utils/posititon";
 
 export class Renderer {
   private context!: GPUCanvasContext;
@@ -11,6 +8,7 @@ export class Renderer {
   private format!: GPUTextureFormat;
 
   private particleRenderer!: ParticlesRenderer;
+  private particleManager!: ParticleManager;
 
   constructor(public canvas: HTMLCanvasElement) {}
 
@@ -48,6 +46,11 @@ export class Renderer {
       this.format
     );
     this.particleRenderer.intialize();
+    this.particleManager = new ParticleManager(
+      this.particleRenderer,
+      this.canvas.width,
+      this.canvas.height
+    );
   }
 
   render() {
@@ -68,13 +71,7 @@ export class Renderer {
 
     this.particleRenderer.framePass(passEncoder);
 
-    for (let i = 0; i < this.particleRenderer.particles.length; i++) {
-      const particle = this.particleRenderer.particles[i];
-      if (particle.pos.x > this.canvas.width + particle.type.radius)
-        particle.pos.x = 0 - particle.type.radius;
-      else particle.pos.x += 0.6;
-      this.particleRenderer.drawParticle(particle.type, particle.pos);
-    }
+    this.particleManager.draw();
 
     this.particleRenderer.frameEnd();
 

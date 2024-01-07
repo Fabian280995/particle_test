@@ -13,4 +13,5 @@ body {
     "Helvetica Neue", Arial, sans-serif;
   color: #333;
   background-color: #fff;
+  overflow: hidden;
 }

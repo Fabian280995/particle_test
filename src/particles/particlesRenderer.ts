@@ -49,20 +49,6 @@ export class ParticlesRenderer {
       this.device,
       new Float32Array(16)
     );
-
-    // initialize particles
-
-    for (let i = 0; i < 2000; i++) {
-      const particle = new Particle(
-        new ParticleType(
-          0,
-          Math.random() * 1.5,
-          new Color(Math.random() * 0.5 + 0.5, 1, 1)
-        ),
-        new Position(Math.random() * this.width, Math.random() * this.height)
-      );
-      this.particles.push(particle);
-    }
   }
 
   public framePass(renderPass: GPURenderPassEncoder) {
@@ -169,5 +155,12 @@ export class ParticlesRenderer {
     for (let instanceBuffer of usedInstanceBuffers) {
       this.allocatedInstanceBuffers.push(instanceBuffer);
     }
+
+    console.log("PIPLINES_PER_TEXTURE: ", this.pipelinesPerParticleType);
+    console.log(
+      "BATCH_DRAW_CALLS_PER_TEXTURE: ",
+      this.drawCallsPerParticleType
+    );
+    console.log("ALLOCATED_VERTEX_BUFFERS: ", this.allocatedInstanceBuffers);
   }
 }
