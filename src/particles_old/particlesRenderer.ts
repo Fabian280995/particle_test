@@ -1,7 +1,7 @@
 import { BufferUtil } from "../utils/buffer-util";
 import { Camera } from "../utils/camera";
 import { Color } from "../utils/color";
-import { Position } from "../utils/posititon";
+import { Position } from "../utils/position";
 import { Particle } from "./Particle";
 import { ParticleType } from "./ParticleType";
 import { ParticlePipeline } from "./particlePipeline";

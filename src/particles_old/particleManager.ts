@@ -1,5 +1,5 @@
 import { Color } from "../utils/color";
-import { Position } from "../utils/posititon";
+import { Position } from "../utils/position";
 import { Particle } from "./Particle";
 import { ParticleType } from "./ParticleType";
 import { ParticlesRenderer } from "./particlesRenderer";

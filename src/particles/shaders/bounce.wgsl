@@ -14,14 +14,14 @@ struct SimParams {
     deltaT : f32,
     maxW : f32,
     maxH : f32,
-    pointerRadius : f32,
 }
+// Definiere die Erdanziehungskraft als Konstante
+const gravity: f32 = 9.81; 
 
 // Buffer für Partikel
 @binding(0) @group(0) var<uniform> params : SimParams;
-@binding(1) @group(0) var<uniform> mousePos : vec2<f32>;
-@binding(2) @group(0) var<storage, read> particlesA : Particles;
-@binding(3) @group(0) var<storage, read_write> particlesB : Particles;
+@binding(1) @group(0) var<storage, read> particlesA : Particles;
+@binding(2) @group(0) var<storage, read_write> particlesB : Particles;
 
 // Main-Funktion des Compute Shaders
 @compute @workgroup_size(64)
@@ -33,20 +33,15 @@ fn main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
     var radius = particlesA.particles[index].radius;
     var mass = particlesA.particles[index].mass;
     var bottom = params.maxH - radius;
+ 
+    vVel.y += gravity * mass * params.deltaT;
+    vPos.y += vVel.y * params.deltaT;
 
-    // Berechne die Distanz zwischen Maus und Partikel
-    var distanceToMouse = distance(vPos, mousePos);
-    var directionToMouse = mousePos - vPos;
-
-    // Überprüfe, ob die Maus innerhalb von x Pixeln vom Partikel entfernt ist
-    if (distanceToMouse < params.pointerRadius) {
-        var awayFromMouse = normalize(directionToMouse) * -1.0;
-        vVel += awayFromMouse * 2; // Die 0.5 ist ein Skalierungsfaktor für die Geschwindigkeit
-    } else {
-        vVel *= 0.99; // Die 0.99 ist ein Dämpfungsfaktor
-    }
-
-    vPos += vVel * params.deltaT;
+    if (vPos.y >= bottom ) {
+        vVel.y = -vVel.y;
+        vVel.y *= 0.6;
+        vPos.y = bottom;
+    } 
 
     particlesB.particles[index].pos = vPos;
     particlesB.particles[index].vel = vVel;

@@ -9,11 +9,14 @@ if (!canvas) {
   console.error("Failed to get canvas");
 }
 
-/* canvas.width = window.innerWidth;
-canvas.height = window.innerHeight; */
-
 const renderer = new Renderer(canvas);
 
 renderer.initialize().then(() => {
+  canvas.addEventListener("mousemove", (e: any) => {
+    renderer.onUpdate = () => {
+      renderer.particleRenderer.updateMousePos(e);
+    };
+  });
+
   renderer.render();
 });

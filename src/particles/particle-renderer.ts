@@ -1,15 +1,15 @@
 import { BufferUtil } from "../utils/buffer-util";
 import { Camera } from "../utils/camera";
-import { Position } from "../utils/posititon";
+import { Position } from "../utils/position";
 import { Velocity } from "../utils/velocity";
 import { ParticleManager } from "./particle-manager";
 
 import shaderSrc from "./shaders/shaders.wgsl?raw";
 import updateWGSL from "./shaders/update.wgsl?raw";
+import { SimulationParameters } from "./sim-params";
 
-const PARTICLE_NUM = 10;
+const PARTICLE_NUM = 10000;
 const FLOATS_PER_PARTICLE = 6;
-const DELTA_T = 0.5;
 
 export class ParticleRenderer {
   private camera: Camera;
@@ -25,14 +25,18 @@ export class ParticleRenderer {
   private projectionViewMatrixBuffer!: GPUBuffer;
   private projectionViewBindGroup!: GPUBindGroup;
 
-  private deltaT = DELTA_T;
   private simParamsBuffer!: GPUBuffer;
+  private mousePosBuffer!: GPUBuffer;
 
   private initialParticleData: Float32Array = new Float32Array(
     PARTICLE_NUM * FLOATS_PER_PARTICLE
   );
 
   private frame = 0;
+
+  private mousePos = new Position(this.width + 1000, this.height + 1000);
+
+  private simParams!: SimulationParameters;
 
   constructor(
     private device: GPUDevice,
@@ -42,6 +46,9 @@ export class ParticleRenderer {
   ) {
     this.camera = new Camera(this.width, this.height);
     this.particleManager = new ParticleManager();
+    this.simParams = new SimulationParameters(this.width, this.height, () =>
+      this.updateSimParams()
+    );
   }
 
   public initialize() {
@@ -56,16 +63,16 @@ export class ParticleRenderer {
           Math.random() * this.width,
           Math.random() * this.height
         ),
-        vel: new Velocity(0, 20),
-        radius: 5,
-        mass: 1,
+        vel: new Velocity(0, 0),
+        radius: 2,
+        mass: Math.random() * 10 + 2,
       });
     }
     console.log(this.particleManager.particles);
 
     this._createPipeline();
-    this.initParticles();
-    this.initBindGroups();
+    this._initParticles();
+    this._initBindGroups();
   }
 
   private _createPipeline() {
@@ -170,11 +177,18 @@ export class ParticleRenderer {
           binding: 1,
           visibility: GPUShaderStage.COMPUTE,
           buffer: {
-            type: "read-only-storage",
+            type: "uniform",
           },
         },
         {
           binding: 2,
+          visibility: GPUShaderStage.COMPUTE,
+          buffer: {
+            type: "read-only-storage",
+          },
+        },
+        {
+          binding: 3,
           visibility: GPUShaderStage.COMPUTE,
           buffer: {
             type: "storage",
@@ -198,29 +212,37 @@ export class ParticleRenderer {
     });
   }
 
-  public initParticles() {
+  public _initParticles() {
     this.initialParticleData =
       this.particleManager.getParticleDataArray(FLOATS_PER_PARTICLE);
   }
 
-  public initBindGroups() {
-    const simParams = new Float32Array([this.deltaT, this.width, this.height]);
+  public _initBindGroups() {
+    console.log(this.initialParticleData);
 
     this.simParamsBuffer = this.device.createBuffer({
       label: `Sim Params Buffer`,
-      size: simParams.byteLength,
+      size: this.simParams.bufferSize,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+
+    this.updateSimParams();
+
+    const mouse = new Float32Array([this.mousePos.x, this.mousePos.y]);
+
+    this.mousePosBuffer = this.device.createBuffer({
+      label: `Mouse Pos Buffer`,
+      size: mouse.byteLength,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
     this.device.queue.writeBuffer(
-      this.simParamsBuffer,
+      this.mousePosBuffer,
       0,
-      simParams.buffer,
-      simParams.byteOffset,
-      simParams.byteLength
+      mouse.buffer,
+      mouse.byteOffset,
+      mouse.byteLength
     );
-
-    console.log(this.initialParticleData);
 
     for (let i = 0; i < 2; ++i) {
       this.particleBuffers[i] = this.device.createBuffer({
@@ -248,13 +270,19 @@ export class ParticleRenderer {
           {
             binding: 1,
             resource: {
+              buffer: this.mousePosBuffer,
+            },
+          },
+          {
+            binding: 2,
+            resource: {
               buffer: this.particleBuffers[i],
               offset: 0,
               size: this.initialParticleData.byteLength,
             },
           },
           {
-            binding: 2,
+            binding: 3,
             resource: {
               buffer: this.particleBuffers[(i + 1) % 2],
               offset: 0,
@@ -265,6 +293,30 @@ export class ParticleRenderer {
       });
     }
   }
+
+  public updateSimParams = () => {
+    const bufferData = this.simParams.getBufferData();
+    this.device.queue.writeBuffer(
+      this.simParamsBuffer,
+      0,
+      bufferData.buffer,
+      bufferData.byteOffset,
+      bufferData.byteLength
+    );
+  };
+
+  public updateMousePos = (e: MouseEvent) => {
+    this.mousePos.x = e.clientX;
+    this.mousePos.y = e.clientY;
+
+    this.device.queue.writeBuffer(
+      this.mousePosBuffer,
+      0,
+      new Float32Array([this.mousePos.x, this.mousePos.y]).buffer,
+      0,
+      8
+    );
+  };
 
   public computeFrame = (computePass: GPUComputePassEncoder) => {
     computePass.setPipeline(this.computePipeline);

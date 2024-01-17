@@ -1,4 +1,4 @@
-import { Position } from "../utils/posititon";
+import { Position } from "../utils/position";
 import { Velocity } from "../utils/velocity";
 
 export class Particle {

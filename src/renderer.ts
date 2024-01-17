@@ -7,7 +7,9 @@ export class Renderer {
   private device!: GPUDevice;
   private format!: GPUTextureFormat;
 
-  private particleRenderer!: ParticleRenderer;
+  public particleRenderer!: ParticleRenderer;
+
+  public onUpdate = () => {};
 
   constructor(public canvas: HTMLCanvasElement) {}
 
@@ -44,7 +46,6 @@ export class Renderer {
       this.canvas.height,
       this.format
     );
-
     this.particleRenderer.initialize();
   }
 
@@ -66,6 +67,8 @@ export class Renderer {
         },
       ],
     };
+
+    this.onUpdate();
 
     // compute pass
     const computePassEncoder = commandEncoder.beginComputePass(
