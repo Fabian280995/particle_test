@@ -12,11 +12,11 @@ export class ParticleManager {
     private width: number,
     private height: number
   ) {
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 10000; i++) {
       const particle = new Particle(
         new ParticleType(
           0,
-          Math.random() * 6,
+          Math.random() * 2,
           new Color(Math.random() * 0.5 + 0.5, 1, 1)
         ),
         new Position(Math.random() * this.width, Math.random() * this.height)
@@ -28,6 +28,11 @@ export class ParticleManager {
   public draw() {
     for (let i = 0; i < this.particles.length; i++) {
       const particle = this.particles[i];
+      if (particle.pos.x > this.width) {
+        particle.pos.x = 0;
+      } else {
+        particle.pos.x += 0.5;
+      }
       this.particleRenderer.drawParticle(particle.type, particle.pos);
     }
   }

@@ -6,18 +6,19 @@ import { Particle } from "./Particle";
 import { ParticleType } from "./ParticleType";
 import { ParticlePipeline } from "./particlePipeline";
 
-const NUMBER_OF_PARTICLES = 1000;
-const FLOATS_PER_PARTICLE = 6;
-
 export class ParticleDrawCall {
   constructor(public pipeline: ParticlePipeline) {}
   public instanceData = new Float32Array(
-    NUMBER_OF_PARTICLES * FLOATS_PER_PARTICLE
+    ParticlesRenderer.NUMBER_OF_PARTICLES *
+      ParticlesRenderer.FLOATS_PER_PARTICLE
   );
   public instanceCount = 0;
 }
 
 export class ParticlesRenderer {
+  static readonly NUMBER_OF_PARTICLES = 1000;
+  static readonly FLOATS_PER_PARTICLE = 6;
+
   private currentParticleType: ParticleType | null = null;
 
   private renderPass!: GPURenderPassEncoder;
@@ -96,7 +97,7 @@ export class ParticlesRenderer {
       this.drawCallsPerParticleType[particleType.id].push(drawCall);
     }
 
-    let i = drawCall.instanceCount * FLOATS_PER_PARTICLE;
+    let i = drawCall.instanceCount * ParticlesRenderer.FLOATS_PER_PARTICLE;
 
     // Instance data
     drawCall.instanceData[0 + i] = pos.x;
@@ -107,7 +108,7 @@ export class ParticlesRenderer {
     drawCall.instanceData[5 + i] = particleType.color.b;
 
     drawCall.instanceCount++;
-    if (drawCall.instanceCount >= NUMBER_OF_PARTICLES) {
+    if (drawCall.instanceCount >= ParticlesRenderer.NUMBER_OF_PARTICLES) {
       const newDrawCall = new ParticleDrawCall(
         this.pipelinesPerParticleType[particleType.id]
       );

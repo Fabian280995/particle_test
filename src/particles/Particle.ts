@@ -1,6 +1,10 @@
 import { Position } from "../utils/posititon";
-import { ParticleType } from "./ParticleType";
+import { Velocity } from "../utils/velocity";
 
 export class Particle {
-  constructor(public type: ParticleType, public pos: Position) {}
+  constructor(
+    public pos: Position,
+    public vel: Velocity,
+    public radius: number
+  ) {}
 }

@@ -1,5 +1,5 @@
-import { ParticleManager } from "./particles/particleManager";
-import { ParticlesRenderer } from "./particles/particlesRenderer";
+import { ParticleRenderer } from "./particles/particle-renderer";
+import { ParticleManager } from "./particles/particle-manager";
 
 export class Renderer {
   private context!: GPUCanvasContext;
@@ -7,8 +7,7 @@ export class Renderer {
   private device!: GPUDevice;
   private format!: GPUTextureFormat;
 
-  private particleRenderer!: ParticlesRenderer;
-  private particleManager!: ParticleManager;
+  private particleRenderer!: ParticleRenderer;
 
   constructor(public canvas: HTMLCanvasElement) {}
 
@@ -39,24 +38,25 @@ export class Renderer {
       format: this.format,
     });
 
-    this.particleRenderer = new ParticlesRenderer(
+    this.particleRenderer = new ParticleRenderer(
       this.device,
       this.canvas.width,
       this.canvas.height,
       this.format
     );
-    this.particleRenderer.intialize();
-    this.particleManager = new ParticleManager(
-      this.particleRenderer,
-      this.canvas.width,
-      this.canvas.height
-    );
+
+    this.particleRenderer.initialize();
   }
 
   render() {
     const commandEncoder = this.device.createCommandEncoder();
     const textureView = this.context.getCurrentTexture().createView();
+
+    const computePassDescriptor: GPUComputePassDescriptor = {
+      label: "compute pass",
+    };
     const renderPassDescriptor: GPURenderPassDescriptor = {
+      label: "render pass",
       colorAttachments: [
         {
           view: textureView,
@@ -67,15 +67,18 @@ export class Renderer {
       ],
     };
 
+    // compute pass
+    const computePassEncoder = commandEncoder.beginComputePass(
+      computePassDescriptor
+    );
+    this.particleRenderer.computeFrame(computePassEncoder);
+    computePassEncoder.end();
+
+    // render pass
     const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
-
-    this.particleRenderer.framePass(passEncoder);
-
-    this.particleManager.draw();
-
-    this.particleRenderer.frameEnd();
-
+    this.particleRenderer.renderFrame(passEncoder);
     passEncoder.end();
+
     this.device.queue.submit([commandEncoder.finish()]);
 
     window.requestAnimationFrame(() => this.render());

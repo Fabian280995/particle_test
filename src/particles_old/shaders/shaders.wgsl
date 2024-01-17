@@ -2,11 +2,12 @@ struct VertexInput {
   @builtin(vertex_index) index: u32,
   @location(0) position: vec2<f32>, // x, y
   @location(1) radius: f32,
+  @location(2) color: vec3<f32> // r, g, b
 };
 struct VertexOut {
   @builtin(position) clip_space: vec4<f32>,
   @location(0) local_space: vec2<f32>,
-  @location(1) color: vec4<f32>,
+  @location(1) color: vec4<f32>
 }
 
 @group(0) @binding(0)
@@ -28,7 +29,7 @@ fn vertMain(input: VertexInput) -> VertexOut {
 
     output.clip_space = projectionViewMatrix * vec4<f32>(world_space, 0.0, 1.0);
     output.local_space = local_space;
-    output.color = vec4<f32>(1.0, 1.0, 1.0, 1.0);
+    output.color = vec4<f32>(input.color, 1.0);
     return output;
 }
 
