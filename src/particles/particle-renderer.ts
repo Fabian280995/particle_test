@@ -7,9 +7,9 @@ import { ParticleManager } from "./particle-manager";
 import shaderSrc from "./shaders/shaders.wgsl?raw";
 import updateWGSL from "./shaders/update.wgsl?raw";
 
-const PARTICLE_NUM = 6;
-const FLOATS_PER_PARTICLE = 5;
-const DELTA_T = 0.04;
+const PARTICLE_NUM = 10;
+const FLOATS_PER_PARTICLE = 6;
+const DELTA_T = 0.5;
 
 export class ParticleRenderer {
   private camera: Camera;
@@ -56,8 +56,9 @@ export class ParticleRenderer {
           Math.random() * this.width,
           Math.random() * this.height
         ),
-        vel: new Velocity(0, 0),
-        radius: 6,
+        vel: new Velocity(0, 20),
+        radius: 5,
+        mass: 1,
       });
     }
     console.log(this.particleManager.particles);
@@ -74,7 +75,7 @@ export class ParticleRenderer {
     });
 
     const instanceBufferLayout: GPUVertexBufferLayout = {
-      arrayStride: 20,
+      arrayStride: 24,
       attributes: [
         {
           format: "float32x2", // position / x, y
@@ -83,13 +84,18 @@ export class ParticleRenderer {
         },
         {
           format: "float32x2", // velocity / x, y
-          offset: 2 * 4,
+          offset: 2 * Float32Array.BYTES_PER_ELEMENT,
           shaderLocation: 1,
         },
         {
           format: "float32", // radius
-          offset: 4 * 4,
+          offset: 4 * Float32Array.BYTES_PER_ELEMENT,
           shaderLocation: 2,
+        },
+        {
+          format: "float32", // mass
+          offset: 5 * Float32Array.BYTES_PER_ELEMENT,
+          shaderLocation: 3,
         },
       ],
       stepMode: "instance",
@@ -218,7 +224,7 @@ export class ParticleRenderer {
 
     for (let i = 0; i < 2; ++i) {
       this.particleBuffers[i] = this.device.createBuffer({
-        label: `Particle Buffer`,
+        label: `Particle Buffer ${i}`,
         size: this.initialParticleData.byteLength,
         usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
         mappedAtCreation: true,
@@ -278,7 +284,7 @@ export class ParticleRenderer {
     renderPass.setPipeline(this.renderPipeline);
     renderPass.setVertexBuffer(0, this.particleBuffers[(this.frame + 1) % 2]);
     renderPass.setBindGroup(0, this.projectionViewBindGroup);
-    renderPass.draw(3, PARTICLE_NUM, 0, 0);
+    renderPass.draw(3, PARTICLE_NUM);
     this.frame++;
   };
 }

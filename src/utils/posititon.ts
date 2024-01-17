@@ -1,3 +1,3 @@
 export class Position {
-  constructor(public x = 0.0, public y = 0.0) {}
+  constructor(public x: number = 0.0, public y: number = 0.0) {}
 }

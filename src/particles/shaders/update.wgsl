@@ -1,19 +1,19 @@
 // Definiert die Struktur eines Partikels
 struct Particle {
-    x: f32,
-    y: f32,
-    vel: vec2<f32>,
-    radius: f32,
+    pos : vec2<f32>,
+    vel : vec2<f32>,
+    radius : f32,
+    mass : f32,
 };
 
 struct Particles {
-    particles: array<Particle>,
+    particles : array<Particle>,
 };
 
 struct SimParams {
-    deltaT: f32,
-    maxW: f32,
-    maxH: f32,
+    deltaT : f32,
+    maxW : f32,
+    maxH : f32,
 }
 // Definiere die Erdanziehungskraft als Konstante
 const gravity: f32 = 9.81; 
@@ -26,18 +26,21 @@ const gravity: f32 = 9.81;
 // Main-Funktion des Compute Shaders
 @compute @workgroup_size(64)
 fn main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
-    let index = GlobalInvocationID.x;
-    
-    // Partikel auslesen
-    // var x = particlesA.particles[index].x;
-    // var y = particlesA.particles[index].y;
-    // var radius = particlesA.particles[index].radius;
+    var index = GlobalInvocationID.x;
 
-    // Position des Partikels
-    // var vPos = vec2<f32>(x, y);
-    // vPos.y += 0.1;
-    
-    // Partikel schreiben
-    // particlesB.particles[index].x = vPos.x;
-    // particlesB.particles[index].y = vPos.y;
+    var vPos = particlesA.particles[index].pos;
+    var vVel = particlesA.particles[index].vel;
+    var radius = particlesA.particles[index].radius;
+    var bottom = params.maxH - radius;
+ 
+    vVel.y += gravity * params.deltaT;
+    vPos.y += vVel.y * params.deltaT;
+    if (vPos.y >= bottom ) {
+        vVel.y = -vVel.y;
+        vVel.y *= 0.6;
+        vPos.y = bottom;
+    } 
+
+    particlesB.particles[index].pos = vPos;
+    particlesB.particles[index].vel = vVel;
 }

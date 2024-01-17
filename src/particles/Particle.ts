@@ -5,6 +5,7 @@ export class Particle {
   constructor(
     public pos: Position,
     public vel: Velocity,
-    public radius: number
+    public radius: number,
+    public mass: number
   ) {}
 }

@@ -16,6 +16,7 @@ export class ParticleManager {
       data[baseIndex + 2] = particle.vel.x;
       data[baseIndex + 3] = particle.vel.y;
       data[baseIndex + 4] = particle.radius;
+      data[baseIndex + 5] = particle.mass;
     });
     return data;
   };
