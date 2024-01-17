@@ -2,6 +2,7 @@
 struct Particle {
     x: f32,
     y: f32,
+    vel: vec2<f32>,
     radius: f32,
 };
 
@@ -28,15 +29,15 @@ fn main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
     let index = GlobalInvocationID.x;
     
     // Partikel auslesen
-    var x = particlesA.particles[index].x;
-    var y = particlesA.particles[index].y;
-    var radius = particlesA.particles[index].radius;
+    // var x = particlesA.particles[index].x;
+    // var y = particlesA.particles[index].y;
+    // var radius = particlesA.particles[index].radius;
 
     // Position des Partikels
-    var vPos = vec2<f32>(x, y);
-    vPos.y += 0.1;
+    // var vPos = vec2<f32>(x, y);
+    // vPos.y += 0.1;
     
     // Partikel schreiben
-    particlesB.particles[index].x = vPos.x;
-    particlesB.particles[index].y = vPos.y;
+    // particlesB.particles[index].x = vPos.x;
+    // particlesB.particles[index].y = vPos.y;
 }

@@ -8,7 +8,7 @@ import shaderSrc from "./shaders/shaders.wgsl?raw";
 import updateWGSL from "./shaders/update.wgsl?raw";
 
 const PARTICLE_NUM = 6;
-const FLOATS_PER_PARTICLE = 3;
+const FLOATS_PER_PARTICLE = 5;
 const DELTA_T = 0.04;
 
 export class ParticleRenderer {
@@ -74,7 +74,7 @@ export class ParticleRenderer {
     });
 
     const instanceBufferLayout: GPUVertexBufferLayout = {
-      arrayStride: 18,
+      arrayStride: 20,
       attributes: [
         {
           format: "float32x2", // position / x, y
@@ -89,7 +89,7 @@ export class ParticleRenderer {
         {
           format: "float32", // radius
           offset: 4 * 4,
-          shaderLocation: 1,
+          shaderLocation: 2,
         },
       ],
       stepMode: "instance",
@@ -213,6 +213,8 @@ export class ParticleRenderer {
       simParams.byteOffset,
       simParams.byteLength
     );
+
+    console.log(this.initialParticleData);
 
     for (let i = 0; i < 2; ++i) {
       this.particleBuffers[i] = this.device.createBuffer({

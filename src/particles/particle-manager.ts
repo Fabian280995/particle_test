@@ -11,9 +11,11 @@ export class ParticleManager {
     const data = new Float32Array(this.particles.length * floatsPerParticle);
     this.particles.forEach((particle, index) => {
       const baseIndex = index * floatsPerParticle;
-      data[baseIndex + 0] = particle.x;
-      data[baseIndex + 1] = particle.y;
-      data[baseIndex + 2] = particle.radius;
+      data[baseIndex + 0] = particle.pos.x;
+      data[baseIndex + 1] = particle.pos.y;
+      data[baseIndex + 2] = particle.vel.x;
+      data[baseIndex + 3] = particle.vel.y;
+      data[baseIndex + 4] = particle.radius;
     });
     return data;
   };

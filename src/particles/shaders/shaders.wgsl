@@ -1,7 +1,8 @@
 struct VertexInput {
   @builtin(vertex_index) index: u32,
   @location(0) position: vec2<f32>, // x, y
-  @location(1) radius: f32,
+  @location(1) velocity: vec2<f32>, // vx, vy
+  @location(2) radius: f32,
 };
 struct VertexOut {
   @builtin(position) clip_space: vec4<f32>,
