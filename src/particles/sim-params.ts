@@ -3,12 +3,14 @@ import dat from "dat.gui";
 // Initial Simulation Parameters
 const DELTA_T = 0.1;
 const POINTER_RADIUS = 50;
+const PARTICLE_VELOCITY_MULTIPLIER = 2.6;
 
 export class SimulationParameters {
-  public bufferSize = 4 * Float32Array.BYTES_PER_ELEMENT;
+  public bufferSize = 5 * Float32Array.BYTES_PER_ELEMENT; // All Parameters (+width, +height)
 
   public deltaT: number = DELTA_T;
   public pointerRadius: number = POINTER_RADIUS;
+  public particleVelocityMultiplier: number = PARTICLE_VELOCITY_MULTIPLIER;
 
   constructor(
     public width: number,
@@ -35,6 +37,12 @@ export class SimulationParameters {
       .name("Pointer Radius")
       .onChange(this.callBack);
 
+    const particleFolder = gui.addFolder("Particle");
+    particleFolder
+      .add(this, "particleVelocityMultiplier", 0.5, 20)
+      .step(0.1)
+      .onChange(this.callBack);
+
     const canvasFolder = gui.addFolder("Canvas");
     canvasFolder.add(this, "width").listen().name("Width");
     canvasFolder.add(this, "height").listen().name("Height");
@@ -46,6 +54,7 @@ export class SimulationParameters {
       this.width,
       this.height,
       this.pointerRadius,
+      this.particleVelocityMultiplier,
     ]);
   }
 }

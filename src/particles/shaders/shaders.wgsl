@@ -37,7 +37,7 @@ fn vertMain(input: VertexInput) -> VertexOut {
     output.clip_space = projectionViewMatrix * vec4<f32>(world_space, 0.0, 1.0);
     output.local_space = local_space;
     // Umwandeln der skalierten Geschwindigkeit in eine Farbe
-    output.color = vec4<f32>(scaledSpeed / 2, 1.0, 1.0 - scaledSpeed, 1.0);
+    output.color = vec4<f32>(scaledSpeed, 0 + scaledSpeed / 2, 1.0 - scaledSpeed / 2, 1.0);
     return output;
 }
 

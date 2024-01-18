@@ -12,11 +12,11 @@ if (!canvas) {
 const renderer = new Renderer(canvas);
 
 renderer.initialize().then(() => {
-  canvas.addEventListener("mousemove", (e: any) => {
+  /* canvas.addEventListener("mousemove", (e: any) => {
     renderer.onUpdate = () => {
       renderer.particleRenderer.updateMousePos(e);
     };
-  });
+  }); */
 
   renderer.render();
 });

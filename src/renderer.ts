@@ -1,5 +1,5 @@
 import { ParticleRenderer } from "./particles/particle-renderer";
-import { ParticleManager } from "./particles/particle-manager";
+import { MouseEventHandler } from "./utils/mouseEventHandler";
 
 export class Renderer {
   private context!: GPUCanvasContext;

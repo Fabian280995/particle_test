@@ -15,6 +15,7 @@ struct SimParams {
     maxW : f32,
     maxH : f32,
     pointerRadius : f32,
+    particleVelM : f32,
 }
 
 // Buffer für Partikel
@@ -41,9 +42,26 @@ fn main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
     // Überprüfe, ob die Maus innerhalb von x Pixeln vom Partikel entfernt ist
     if (distanceToMouse < params.pointerRadius) {
         var awayFromMouse = normalize(directionToMouse) * -1.0;
-        vVel += awayFromMouse * 2; // Die 0.5 ist ein Skalierungsfaktor für die Geschwindigkeit
+        vVel += awayFromMouse * params.particleVelM; // Skalierungsfaktor für die Geschwindigkeit
     } else {
         vVel *= 0.99; // Die 0.99 ist ein Dämpfungsfaktor
+    }
+
+    // Collision Detection mit den Wänden#
+    if (vPos.x < radius) {
+        vPos.x = radius;
+        vVel.x *= -1.0;
+    } else if (vPos.x > params.maxW - radius) {
+        vPos.x = params.maxW - radius;
+        vVel.x *= -1.0;
+    } else
+    // Collision Detection mit dem Boden und Decke
+    if (vPos.y < radius) {
+        vPos.y = radius;
+        vVel.y *= -1.0;
+    } else if (vPos.y > bottom) {
+        vPos.y = bottom;
+        vVel.y *= -1.0;
     }
 
     vPos += vVel * params.deltaT;
