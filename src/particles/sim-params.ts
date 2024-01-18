@@ -2,8 +2,8 @@ import dat from "dat.gui";
 
 // Initial Simulation Parameters
 const DELTA_T = 0.1;
-const POINTER_RADIUS = 50;
-const PARTICLE_VELOCITY_MULTIPLIER = 2.6;
+const POINTER_RADIUS = 150;
+const PARTICLE_VELOCITY_MULTIPLIER = 6;
 
 export class SimulationParameters {
   public bufferSize = 5 * Float32Array.BYTES_PER_ELEMENT; // All Parameters (+width, +height)

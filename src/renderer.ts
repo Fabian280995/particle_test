@@ -9,6 +9,8 @@ export class Renderer {
 
   public particleRenderer!: ParticleRenderer;
 
+  public mouseEventHandler!: MouseEventHandler;
+
   public onUpdate = () => {};
 
   constructor(public canvas: HTMLCanvasElement) {}
@@ -47,6 +49,17 @@ export class Renderer {
       this.format
     );
     this.particleRenderer.initialize();
+
+    this.mouseEventHandler = new MouseEventHandler(
+      this.device,
+      this.canvas,
+      (this.onUpdate = () => {
+        this.particleRenderer.updateMouseEvents(
+          this.mouseEventHandler.getMousePos(),
+          this.mouseEventHandler.isMouseDown()
+        );
+      })
+    );
   }
 
   render() {

@@ -1,5 +1,6 @@
 import { BufferUtil } from "../utils/buffer-util";
 import { Camera } from "../utils/camera";
+import { MouseEventHandler } from "../utils/mouseEventHandler";
 import { Position } from "../utils/position";
 import { Velocity } from "../utils/velocity";
 import { ParticleManager } from "./particle-manager";
@@ -34,8 +35,8 @@ export class ParticleRenderer {
 
   private frame = 0;
 
-  private mousePos = new Position(this.width + 1000, this.height + 1000);
-
+  /*   private mousePos = new Position(this.width + 1000, this.height + 1000);
+   */
   private simParams!: SimulationParameters;
 
   constructor(
@@ -64,8 +65,8 @@ export class ParticleRenderer {
           Math.random() * this.height
         ),
         vel: new Velocity(0, 0),
-        radius: 2,
-        mass: Math.random() * 10 + 2,
+        radius: 1,
+        mass: 1,
       });
     }
     console.log(this.particleManager.particles);
@@ -228,20 +229,15 @@ export class ParticleRenderer {
 
     this.updateSimParams();
 
-    const mouse = new Float32Array([this.mousePos.x, this.mousePos.y]);
-
     this.mousePosBuffer = this.device.createBuffer({
       label: `Mouse Pos Buffer`,
-      size: mouse.byteLength,
+      size: MouseEventHandler.mouseBufferSize.byteLength,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
-    this.device.queue.writeBuffer(
-      this.mousePosBuffer,
-      0,
-      mouse.buffer,
-      mouse.byteOffset,
-      mouse.byteLength
+    this.updateMouseEvents(
+      new Position(this.width + 1000, this.height + 1000),
+      false
     );
 
     for (let i = 0; i < 2; ++i) {
@@ -305,7 +301,7 @@ export class ParticleRenderer {
     );
   };
 
-  public updateMousePos = (e: MouseEvent) => {
+  /* public updateMousePos = (e: MouseEvent) => {
     this.mousePos.x = e.clientX;
     this.mousePos.y = e.clientY;
 
@@ -315,6 +311,18 @@ export class ParticleRenderer {
       new Float32Array([this.mousePos.x, this.mousePos.y]).buffer,
       0,
       8
+    );
+  }; */
+
+  public updateMouseEvents = (pos: Position, leftDown: boolean) => {
+    const mouse = new Float32Array([pos.x, pos.y, leftDown ? 1.0 : 0.0]);
+
+    this.device.queue.writeBuffer(
+      this.mousePosBuffer,
+      0,
+      mouse.buffer,
+      0,
+      mouse.byteLength
     );
   };
 

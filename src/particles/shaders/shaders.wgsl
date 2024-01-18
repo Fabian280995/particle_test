@@ -24,27 +24,35 @@ var<private> VERTICES: array<vec2<f32>, 3> = array<vec2<f32>, 3>(
 fn vertMain(input: VertexInput) -> VertexOut {
     var output: VertexOut;
 
+    var angle: f32 = 0.0;
+    if (length(input.velocity) > 0.0) {
+        angle = -atan2(input.velocity.x, input.velocity.y);
+    }
+
     let local_space = VERTICES[input.index];
     
-    let world_space: vec2<f32> = local_space * input.radius + input.position;
+    let rotated_space = vec2(
+        (local_space.x * cos(angle)) - (local_space.y * sin(angle)),
+        (local_space.x * sin(angle)) + (local_space.y * cos(angle))
+    );
+
+    let world_space: vec2<f32> = rotated_space * input.radius + input.position;
 
     // Berechnung der Geschwindigkeitslänge
     let speed = length(input.velocity);
-
-    // Skaliere die Geschwindigkeit und wende eine Sättigungsfunktion an
-    let scaledSpeed = min(speed / 20.0, 1.0); // Skalieren und Sättigung
+    let scaledSpeed = min(speed / 20.0, 1.0);
 
     output.clip_space = projectionViewMatrix * vec4<f32>(world_space, 0.0, 1.0);
-    output.local_space = local_space;
+    output.local_space = rotated_space;
     // Umwandeln der skalierten Geschwindigkeit in eine Farbe
-    output.color = vec4<f32>(scaledSpeed, 0 + scaledSpeed / 2, 1.0 - scaledSpeed / 2, 1.0);
+    output.color = vec4<f32>(scaledSpeed, 1.0 - scaledSpeed / 2, min(input.position.x / 920, 1.0), 1.0);
     return output;
 }
 
 @fragment
 fn fragMain(fragData: VertexOut) -> @location(0) vec4<f32> {
-  if dot(fragData.local_space, fragData.local_space) > 1.0 {
-    discard;
-  }
+  // if dot(fragData.local_space, fragData.local_space) > 1.0 {
+  //  discard;
+  // }
   return fragData.color;
 }
